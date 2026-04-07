@@ -79,23 +79,17 @@ app.post('/supplier', (req, res) => {
     return res.status(400).json({ message: "All fields required" });
   }
 
-  db.run(
-    `INSERT INTO suppliers (name, city) VALUES (?, ?)`,
-    [name, city],
-    function (err) {
-      if (err) {
-        return res.status(500).json(err);
-      }
-      res.json({ id: this.lastID, name, city });
-    }
-  );
+  const result = db
+    .prepare("INSERT INTO suppliers (name, city) VALUES (?, ?)")
+    .run(name, city);
+
+  res.json({ id: result.lastInsertRowid, name, city });
 });
 
 //POST /inventory API
 app.post('/inventory', (req, res) => {
   const { supplier_id, product_name, quantity, price } = req.body;
 
-  // validations
   if (quantity < 0) {
     return res.status(400).json({ message: "Quantity must be >= 0" });
   }
@@ -104,55 +98,36 @@ app.post('/inventory', (req, res) => {
     return res.status(400).json({ message: "Price must be > 0" });
   }
 
-  // check supplier exists
-  db.get(
-    `SELECT * FROM suppliers WHERE id = ?`,
-    [supplier_id],
-    (err, supplier) => {
-      if (!supplier) {
-        return res.status(400).json({ message: "Invalid supplier_id" });
-      }
+  const supplier = db
+    .prepare("SELECT * FROM suppliers WHERE id = ?")
+    .get(supplier_id);
 
-      db.run(
-        `INSERT INTO inventory (supplier_id, product_name, quantity, price)
-         VALUES (?, ?, ?, ?)`,
-        [supplier_id, product_name, quantity, price],
-        function (err) {
-          if (err) {
-            return res.status(500).json(err);
-          }
+  if (!supplier) {
+    return res.status(400).json({ message: "Invalid supplier_id" });
+  }
 
-          res.json({
-            id: this.lastID,
-            supplier_id,
-            product_name,
-            quantity,
-            price
-          });
-        }
-      );
-    }
-  );
+  const result = db
+    .prepare(`INSERT INTO inventory (supplier_id, product_name, quantity, price)
+              VALUES (?, ?, ?, ?)`)
+    .run(supplier_id, product_name, quantity, price);
+
+  res.json({
+    id: result.lastInsertRowid,
+    supplier_id,
+    product_name,
+    quantity,
+    price
+  });
 });
-
 //GET /inventory API
 app.get('/inventory', (req, res) => {
-  db.all(
-    `SELECT * FROM inventory`,
-    [],
-    (err, rows) => {
-      if (err) {
-        return res.status(500).json(err);
-      }
-      res.json(rows);
-    }
-  );
+  const rows = db.prepare("SELECT * FROM inventory").all();
+  res.json(rows);
 });
 
 //GROUP BY Query
 app.get('/inventory/grouped', (req, res) => {
-  db.all(
-    `
+  const rows = db.prepare(`
     SELECT 
       s.id,
       s.name,
@@ -161,13 +136,7 @@ app.get('/inventory/grouped', (req, res) => {
     JOIN inventory i ON s.id = i.supplier_id
     GROUP BY s.id, s.name
     ORDER BY total_value DESC
-    `,
-    [],
-    (err, rows) => {
-      if (err) {
-        return res.status(500).json(err);
-      }
-      res.json(rows);
-    }
-  );
+  `).all();
+
+  res.json(rows);
 });

@@ -1,0 +1,78 @@
+/* Overall Page */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f6f8;
+  margin: 0;
+  padding: 0;
+}
+
+/* Main Container */
+.container {
+  width: 80%;
+  margin: 40px auto;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Heading */
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Inputs & Select */
+input,
+select {
+  padding: 10px;
+  margin: 10px 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+/* Button */
+button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th {
+  background-color: #007bff;
+  color: white;
+}
+
+th,
+td {
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+/* Error */
+.error {
+  color: red;
+  margin-top: 10px;
+}
+
+/* No results */
+.no-results {
+  text-align: center;
+  margin-top: 20px;
+  color: gray;
+}

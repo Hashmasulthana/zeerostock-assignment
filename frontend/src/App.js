@@ -12,27 +12,31 @@ function App() {
   const handleSearch = async () => {
     setError("");
 
-    let url = "http://localhost:5000/search?";
+    
+    let url = "https://zeerostock-assignment-ufws.onrender.com/search?";
 
-    if (q) url += `q=${q}&`;
+    
+    if (q.trim()) url += `q=${q}&`;
     if (category) url += `category=${category}&`;
-    if (minPrice) url += `minPrice=${minPrice}&`;
-    if (maxPrice) url += `maxPrice=${maxPrice}&`;
+    if (minPrice !== "") url += `minPrice=${minPrice}&`;
+    if (maxPrice !== "") url += `maxPrice=${maxPrice}&`;
 
     try {
       const res = await fetch(url);
-      
+
       if (!res.ok) {
         const err = await res.json();
-        setError(err.message);
+        setError(err.message || "Error occurred");
         setResults([]);
         return;
       }
 
       const data = await res.json();
+
       setResults(data);
     } catch (err) {
       setError("Server error");
+      setResults([]);
     }
   };
 
@@ -46,7 +50,7 @@ function App() {
         onChange={(e) => setQ(e.target.value)}
       />
 
-      <select onChange={(e) => setCategory(e.target.value)}>
+      <select value={category} onChange={(e) => setCategory(e.target.value)}>
         <option value="">All Categories</option>
         <option value="Furniture">Furniture</option>
         <option value="Electronics">Electronics</option>
@@ -71,31 +75,35 @@ function App() {
 
       <br /><br />
 
+     
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {results.length === 0 ? (
+     
+      {!error && results.length === 0 ? (
         <p>No results found</p>
       ) : (
-        <table border="1" cellPadding="10">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Price</th>
-              <th>Supplier</th>
-            </tr>
-          </thead>
-          <tbody>
-            {results.map((item) => (
-              <tr key={item.id}>
-                <td>{item.productName}</td>
-                <td>{item.category}</td>
-                <td>{item.price}</td>
-                <td>{item.supplier}</td>
+        results.length > 0 && (
+          <table border="1" cellPadding="10">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Supplier</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {results.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.productName}</td>
+                  <td>{item.category}</td>
+                  <td>{item.price}</td>
+                  <td>{item.supplier}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )
       )}
     </div>
   );
